@@ -40,3 +40,6 @@
   roles:
     - name: os_keystone
       become: yes
+  vars_files:
+    - "defaults/repo_packages/openstack_services.yml"
+    - "defaults/{{ install_method }}_install.yml"
