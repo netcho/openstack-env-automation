@@ -1,0 +1,6 @@
+.idea/
+roles/**/
+!roles/requirements.yaml
+collections/**/
+!collections/requirements.yaml
+inventory.*

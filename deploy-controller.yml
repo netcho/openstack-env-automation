@@ -1,0 +1,15 @@
+- name: Deploying OpenStack control plane
+  hosts: openstack_controllers
+  become_method: sudo
+  roles:
+    - name: openstack_hosts
+      become: yes
+      vars:
+        openstack_host_manage_deploy_hosts_file: no
+    - name: galera_server
+      become: yes
+      vars:
+        galera_cluster_members: "{{ groups['openstack_controllers'] }}"
+        galera_install_server: true
+        galera_install_client: true
+        galera_ssl_server: "{{ groups['openstack_controllers'][0] }}"
