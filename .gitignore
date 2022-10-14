@@ -4,3 +4,4 @@ roles/**/
 collections/**/
 !collections/requirements.yaml
 inventory.*
+ansible.cfg

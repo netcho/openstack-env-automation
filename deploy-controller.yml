@@ -1,4 +1,4 @@
-- name: Deploying OpenStack control plane
+- name: Bootstraping OpenStack control plane hosts
   hosts: openstack_controllers
   become_method: sudo
   roles:
@@ -6,10 +6,37 @@
       become: yes
       vars:
         openstack_host_manage_deploy_hosts_file: no
+
+- name: Deploying Galera cluster
+  hosts: galera_all
+  become_method: sudo
+  roles:
     - name: galera_server
       become: yes
       vars:
-        galera_cluster_members: "{{ groups['openstack_controllers'] }}"
         galera_install_server: true
-        galera_install_client: true
-        galera_ssl_server: "{{ groups['openstack_controllers'][0] }}"
+
+- name: Deploying RabbitMQ cluster
+  hosts: rabbitmq_all
+  become_method: sudo
+  roles:
+    - name: rabbitmq_server
+      become: yes
+  vars:
+    openstack_pki_setup_host: "{{ groups['rabbitmq_all'][0] }}"
+
+- name: Installing memcached
+  hosts: memcached
+  become_method: sudo
+  roles:
+    - name: memcached_server
+      become: yes
+
+- import_playbook: utility-install.yml
+
+- name: Installing Keystone
+  hosts: keystone_all
+  become_method: sudo
+  roles:
+    - name: os_keystone
+      become: yes
