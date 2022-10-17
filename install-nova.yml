@@ -42,8 +42,11 @@
     - nova
   roles:
     - role: "os_nova"
-      nova_management_address: "{{ ansible_host }}"
       become: yes
+      vars:
+        nova_management_address: "{{ ansible_host }}"
+        nova_user_pip_packages:
+          - python-binary-memcached
     - role: "openstack.osa.system_crontab_coordination"
       become: yes
       tags:

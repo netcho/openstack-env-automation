@@ -64,6 +64,14 @@
   tags:
     - glance
 
+- name: Installing Placement
+  hosts: placement_all
+  roles:
+    - name: os_placement
+      become: yes
+  vars_files:
+    - "defaults/{{ install_method }}_install.yml"
+
 - name: Installing Nova control plane
   import_playbook: install-nova.yml
   vars:
