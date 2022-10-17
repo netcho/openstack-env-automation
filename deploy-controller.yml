@@ -33,6 +33,7 @@
       become: yes
 
 - import_playbook: utility-install.yml
+- import_playbook: certificate-ssh-authority.yml
 
 - name: Installing Keystone
   hosts: keystone_all
