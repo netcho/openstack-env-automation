@@ -65,11 +65,11 @@
     - glance
 
 - name: Installing Nova control plane
-  import_playbook: common-playbooks/nova.yml
+  import_playbook: install-nova.yml
   vars:
     nova_hosts: "nova_conductor:nova_scheduler:nova_api_os_compute:nova_api_metadata:nova_console"
 
 - name: Install Nova compute agents
-  import_playbook: common-playbooks/nova.yml
+  import_playbook: install-nova.yml
   vars:
     nova_hosts: "nova_compute:!nova_conductor:!nova_scheduler:!nova_api_os_compute:!nova_api_metadata:!nova_console"

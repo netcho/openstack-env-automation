@@ -36,7 +36,7 @@
   gather_facts: false
   environment: "{{ deployment_environment_variables | default({}) }}"
   vars_files:
-    - "../defaults/repo_packages/nova_consoles.yml"
+    - "defaults/repo_packages/nova_consoles.yml"
     - "../defaults/{{ install_method }}_install.yml"
   tags:
     - nova
