@@ -25,7 +25,6 @@
   gather_facts: false
   environment: "{{ deployment_environment_variables | default({}) }}"
   vars_files:
-    - "defaults/repo_packages/openstack_services.yml"
     - "defaults/{{ install_method }}_install.yml"
   vars:
     utility_upper_constraints_url: "{{ requirements_git_url | default('https://releases.openstack.org/constraints/upper/' ~
@@ -54,6 +53,14 @@
         galera_install_client: true
         galera_install_server: false
     - role: "openstack_openrc"
+      vars:
+        openrc_openstack_client_config_dir_dest: /etc/openstack
+        openrc_openstack_client_config_dir_owner: root
+        openrc_openstack_client_config_dir_group: root
+        openrc_openstack_client_config_dir_mode: "0755"
+        openrc_clouds_yml_file_owner: root
+        openrc_clouds_yml_file_group: root
+        openrc_clouds_yml_file_mode: "0644"
       tags:
         - openrc
 
