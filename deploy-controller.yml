@@ -1,5 +1,5 @@
-- name: Bootstraping OpenStack control plane hosts
-  hosts: openstack_controllers
+- name: Bootstrapping OpenStack hosts
+  hosts: openstack_controllers,nova_compute
   become_method: sudo
   roles:
     - name: openstack_hosts
