@@ -37,9 +37,26 @@
 
 - name: Installing Keystone
   hosts: keystone_all
-  become_method: sudo
+  become: yes
+  pre_tasks:
+    - name: "Pre-service deployment tasks from os_keystone role"
+      include_role:
+        name: os_keystone
+        tasks_from: main_pre.yml
+      vars:
+        keystone_ssh_keypairs_setup_host: "{{ groups['keystone_all'][0] }}"
   roles:
     - name: os_keystone
+  vars:
+    keystone_user_pip_packages:
+      - python-binary-memcached
+  vars_files:
+    - "defaults/{{ install_method }}_install.yml"
+
+- name: Installing Glance
+  hosts: glance_all
+  roles:
+    - name: os_glance
       become: yes
   vars_files:
     - "defaults/repo_packages/openstack_services.yml"
