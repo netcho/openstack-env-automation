@@ -1,0 +1,55 @@
+---
+# Copyright 2014, Rackspace US, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- name: Gather neutron facts
+  hosts: "{{ neutron_hosts }}"
+  gather_facts: false
+  tags:
+    - always
+  tasks:
+    - name: Gather minimal facts for neutron
+      setup:
+        gather_subset:
+          - "!all"
+          - min
+      when: osa_gather_facts | default(True)
+
+    - name: Gather additional facts for neutron
+      setup:
+        gather_subset: "{{ neutron_gather_subset | default('processor_count') }}"
+        filter: "{{ neutron_gather_filter | default('ansible_processor*') }}"
+      when: osa_gather_facts | default(True)
+
+- name: Install neutron services
+  hosts: "{{ neutron_hosts }}"
+  gather_facts: false
+  environment: "{{ deployment_environment_variables | default({}) }}"
+  vars_files:
+    - "defaults/{{ install_method }}_install.yml"
+  tags:
+    - neutron
+  roles:
+    - role: "os_neutron"
+      become: yes
+    - role: "bird"
+      become: yes
+      when:
+        - "'neutron_calico_dhcp_agent' in group_names"
+      tags:
+        - bird
+    - role: "openstack.osa.system_crontab_coordination"
+      become: yes
+      tags:
+        - crontab
