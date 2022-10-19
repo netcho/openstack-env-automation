@@ -1,5 +1,5 @@
 - name: Bootstrapping OpenStack hosts
-  hosts: openstack_controllers,nova_compute
+  hosts: openstack_hosts
   become_method: sudo
   roles:
     - name: openstack_hosts
@@ -86,13 +86,16 @@
   import_playbook: install-neutron.yml
   vars:
     neutron_hosts: "neutron_server"
+    venv_wheel_build_enable: False
 
-- name: Install neutron L2 agents
+- name: Install Neutron agents
   import_playbook: install-neutron.yml
   vars:
-    neutron_hosts: "neutron_linuxbridge_agent:neutron_openvswitch_agent:!neutron_server"
+    neutron_hosts: "neutron_dhcp_agent:neutron_metadata_agent"
+    venv_wheel_build_enable: False
 
-- name: Install all other Neutron agents
+- name: Install Neutron L2 agents
   import_playbook: install-neutron.yml
   vars:
-    neutron_hosts: "neutron_all:!neutron_linuxbridge_agent:!neutron_openvswitch_agent:!neutron_server"
+    neutron_hosts: "neutron_linuxbridge_agent"
+    venv_wheel_build_enable: False
