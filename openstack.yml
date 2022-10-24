@@ -3,7 +3,39 @@ only_clouds:
   - openstack-testing
 private: yes
 expand_hostvars: yes
-#legacy_groups: no
+legacy_groups: no
 fail_on_errors: yes
-compose:
-  deployment_node_role: "openstack.metadata.node_role"
+keyed_groups:
+  - key: openstack.metadata.os_dev_stack_uuid
+    prefix: os_dev_stack
+    parent_group: hosts
+  - key: openstack.metadata.os_dev_stack_role
+    prefix: os_dev_stack
+    parent_group: "{{ 'os_dev_stack_' + openstack.metadata.os_dev_stack_uuid }}"
+groups:
+  openstack_hosts: openstack.metadata.os_dev_stack_uuid is defined
+  utility_all: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  galera_all: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  rabbitmq_all: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  memcached: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  keystone_all: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  glance_all: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  glance_api: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  placement_all: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  placement_api: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  nova_all: openstack.metadata.os_dev_stack_role is defined and (openstack.metadata.os_dev_stack_role == "controller" or "compute" in openstack.metadata.os_dev_stack_role)
+  nova_api_os_compute: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  nova_api_metadata: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  nova_scheduler: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  nova_conductor: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  nova_console: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  nova_compute: openstack.metadata.os_dev_stack_role is defined and "compute" in openstack.metadata.os_dev_stack_role
+  neutron_all: openstack.metadata.os_dev_stack_role is defined and (openstack.metadata.os_dev_stack_role == "controller" or "compute" in openstack.metadata.os_dev_stack_role)
+  neutron_server: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  neutron_dhcp_agent: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  neutron_metadata_agent: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  neutron_linuxbridge_agent: openstack.metadata.os_dev_stack_role is defined and (openstack.metadata.os_dev_stack_role == "controller" or "compute" in openstack.metadata.os_dev_stack_role)
+  cinder_all: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  cinder_api: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  cinder_scheduler: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
+  cinder_volume: openstack.metadata.os_dev_stack_role is defined and openstack.metadata.os_dev_stack_role == "controller"
