@@ -1,0 +1,12 @@
+SP_CLUSTER_NAME={{ sp_cluster_name }}
+SP_CLUSTER_ID={{ sp_cluster_id }}
+SP_EXPECTED_NODES=1
+
+SP_RAUTH_TOKEN={{ sp_rauth_token }}
+
+SP_AUTH_TOKEN={{ sp_auth_token }}
+
+{% for storpool_node_name in groups['storpool'] %}
+[{{ hostvars[storpool_node_name]['ansible_hostname'] }}]
+SP_OURID=
+{% endfor %}

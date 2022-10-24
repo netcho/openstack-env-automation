@@ -1,0 +1,24 @@
+- name: Installing StorPool
+  hosts: storpool
+  gather_facts: yes
+  pre_tasks:
+    - import_tasks: tasks/generate_storpool_configuration.yml
+  roles:
+    - storpool.bootstrap_node
+    - storpool.install_sp_python
+    - install_storpool_components
+    - configure_networking
+
+- name: Configure StorPool disks
+  hosts: storpool_server
+  gather_facts: false
+  roles:
+    - initialize_disks
+
+- name: Configure StorPool CGroups
+  hosts: storpool
+  gather_facts: false
+  roles:
+    - configure_cgroups
+    - configure_services
+
