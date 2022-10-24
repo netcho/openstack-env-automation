@@ -7,6 +7,15 @@ SP_RAUTH_TOKEN={{ sp_rauth_token }}
 SP_AUTH_TOKEN={{ sp_auth_token }}
 
 {% for storpool_node_name in groups['storpool'] %}
-[{{ hostvars[storpool_node_name]['ansible_hostname'] }}]
-SP_OURID=
+{% set node = hostvars[storpool_node_name] %}
+[{{ node.ansible_facts.hostname }}]
+{% set node_ip = (storpool_ip | ansible.utils.ipv4('address')) %}
+SP_OURID={{ node_ip | split('.') | last }}
+{% for interface in node.ansible_interfaces %}
+{% if 'macaddress' in node.ansible_facts[interface] %}
+{% if node.ansible_facts[interface].macaddress == () %}
+SP_IFACE1_CFG=1:{{ node.ansible_facts[interface].device }}:{{ node.ansible_facts[interface].device }}:0:{{ node.ansible_facts[interface].ipv4.address }}:b:x:v
+{% endif %}
+{% endfor %}
+{% endfor %}
 {% endfor %}

@@ -1,0 +1,9 @@
+plugin: openstack.cloud.openstack
+only_clouds:
+  - openstack-testing
+private: yes
+expand_hostvars: yes
+#legacy_groups: no
+fail_on_errors: yes
+compose:
+  deployment_node_role: "openstack.metadata.node_role"
