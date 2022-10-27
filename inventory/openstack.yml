@@ -1,6 +1,4 @@
 plugin: openstack.cloud.openstack
-only_clouds:
-  - openstack-testing
 private: yes
 legacy_groups: no
 expand_hostvars: yes
