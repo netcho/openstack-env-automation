@@ -1,56 +1,30 @@
 all:
   hosts:
-    kk-test-os-controller:
-      ansible_host: 10.40.0.222
-      ansible_user: ubuntu
-      management_address: 10.40.0.222
-      tunnel_address: 10.40.0.222
-      storage_address: 10.40.0.222
-    kk-test-os-compute:
-      ansible_host: 10.40.0.103
-      ansible_user: ubuntu
-      management_address: 10.40.0.103
-      tunnel_address: 10.40.0.103
-      storage_address: 10.40.0.103
   children:
     hosts:
       hosts:
       children:
         openstack_hosts:
           hosts:
-            kk-test-os-controller:
-            kk-test-os-compute:
         galera_all:
           hosts:
-            kk-test-os-controller:
         qdrouterd_all:
-          hosts: {}
+          hosts:
         rabbitmq_all:
           hosts:
-            kk-test-os-controller:
         memcached:
           hosts:
-            kk-test-os-controller:
         utility_all:
           hosts:
-            kk-test-os-controller:
         keystone_all:
           hosts:
-            kk-test-os-controller:
           vars:
-            keystone_container_mysql_password: 48953409g534n98h
-            keystone_auth_admin_password: 48523fdjgnper
-            keystone_oslomsg_rpc_password: 546grtrryh4ar654
         glance_all:
           hosts:
           children:
             glance_api:
               hosts:
-                kk-test-os-controller:
           vars:
-            glance_container_mysql_password: 982345y2407520g5
-            glance_service_password: 4982h529345h289hf
-            glance_oslomsg_rpc_password: 9234h29hr239819
             glance_user_pip_packages:
               - storpool
               - storpool.spopenstack
@@ -59,37 +33,22 @@ all:
           children:
             placement_api:
               hosts:
-                kk-test-os-controller:
-          vars:
-            placement_service_password: 4r6w8g1rew67t
-            placement_galera_password: w3ertweg6ewrw6r
         nova_all:
           hosts:
           children:
             nova_api_os_compute:
               hosts:
-                kk-test-os-controller:
             nova_api_metadata:
               hosts:
-                kk-test-os-controller:
             nova_conductor:
               hosts:
-                kk-test-os-controller:
             nova_scheduler:
               hosts:
-                kk-test-os-controller:
             nova_console:
               hosts:
-                kk-test-os-controller:
             nova_compute:
               hosts:
-                kk-test-os-compute:
           vars:
-            nova_container_mysql_password: 934h56g4er79g
-            nova_api_container_mysql_password: ser86t4e4g6sre87t
-            nova_metadata_proxy_secret: g157r6twe6r89t7
-            nova_service_password: ds87erq9w8e7r465
-            nova_oslomsg_rpc_password: e65rt4we6r5t4w6r87t
             nova_libvirtd_listen_tls: 0
             nova_qemu_vnc_tls: 0
             nova_user_pip_packages:
@@ -100,29 +59,20 @@ all:
           children:
             neutron_server:
               hosts:
-                kk-test-os-controller:
             neutron_dhcp_agent:
               hosts:
-                kk-test-os-controller:
             neutron_metadata_agent:
               hosts:
-                kk-test-os-controller:
             neutron_linuxbridge_agent:
               hosts:
-                kk-test-os-controller:
-                kk-test-os-compute:
             neutron_l3_agent:
               hosts:
             neutron_ovn_northd:
               hosts:
           vars:
-            neutron_container_mysql_password: 2348rh23475h237319
-            neutron_service_password: 123jk5b1k6jb
-            neutron_oslomsg_rpc_password: 1o2i35b1p3iu4b61
             neutron_provider_networks:
               network_types: "vxlan,flat"
               network_flat_networks: "provider"
-              network_mappings: "provider:ens4"
             neutron_neutron_conf_overrides:
               experimental:
                 linuxbridge: True
@@ -131,58 +81,36 @@ all:
           children:
             cinder_api:
               hosts:
-                kk-test-os-controller:
             cinder_scheduler:
               hosts:
-                kk-test-os-controller:
             cinder_volume:
               hosts:
-                kk-test-os-controller:
             cinder_backup:
               hosts:
           vars:
-            cinder_container_mysql_password: 42395hs6d5g46s6
-            cinder_service_password: s65rg1re6srtse68t
-            cinder_profiler_hmac_key: i7k4aw464qw674
-            cinder_oslomsg_rpc_password: fr4q687wer4w6t4erty
             cinder_glance_api_servers: "http://{{ groups['utility_all'][0] }}:9292"
             cinder_user_pip_packages:
               - storpool
               - storpool.spopenstack
-            cinder_backends:
-              storpool-virtual-block:
-                volume_backend_name: storpool-virtual-block
-                volume_driver: cinder.volume.drivers.storpool.StorPoolDriver
-                storpool_template: virtual
     storpool:
       hosts:
-        lab-os-dev-storage:
-          ansible_host: 10.40.0.243
-          ansible_user: ubuntu
       vars:
         sp_new_cluster: True
         sp_reboot_after_install: True
       children:
         storpool_server:
           hosts:
-            lab-os-dev-storage:
           vars:
             sp_min_disk_size: 200GB
             sp_test_discovered_disks: False
         storpool_block:
           hosts:
-            kk-test-os-compute:
         storpool_mgmt:
           hosts:
-            lab-os-dev-storage:
         storpool_iscsi:
-          hosts: { }
-          vars: { }
+          hosts:
   vars:
     openstack_ssh_keypairs_setup_host: "{{ groups['utility_all'][0] }}"
     external_lb_vip_address: "{{ hostvars[groups['utility_all'][0]]['management_address'] }}"
     internal_lb_vip_address: "{{ hostvars[groups['utility_all'][0]]['management_address'] }}"
     galera_root_user: root
-    galera_root_password: fin39fkvns324p234
-    rabbitmq_cookie_token: 48529uh0254t0245
-    memcached_encryption_key: 42395h23n54h234958245g
