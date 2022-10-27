@@ -2,8 +2,8 @@ plugin: openstack.cloud.openstack
 only_clouds:
   - openstack-testing
 private: yes
-expand_hostvars: yes
 legacy_groups: no
+expand_hostvars: yes
 fail_on_errors: yes
 keyed_groups:
   - key: openstack.metadata.os_dev_stack_uuid
