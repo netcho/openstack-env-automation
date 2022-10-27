@@ -1,0 +1,13 @@
+- name: Filling skeleton inventory
+  hosts: localhost
+  tasks:
+    - import_tasks: tasks/generate_storpool_configuration.yml
+
+- name: Bootstrapping OpenStack hosts
+  hosts: openstack_hosts
+  become_method: sudo
+  roles:
+    - name: openstack_hosts
+      become: yes
+      vars:
+        openstack_host_manage_deploy_hosts_file: no

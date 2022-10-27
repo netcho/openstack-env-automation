@@ -1,18 +1,17 @@
-- name: Generating a list of StorPool hosts
-  ansible.builtin.add_host:
-    name: "{{ hostname }}"
-    groups:
-      - storpool
-  loop: "{{ (groups['os_dev_stack_storage'] + groups['os_dev_stack_block_compute']) | intersect(groups['os_dev_stack_' + stack_uuid]) }}"
-  loop_control:
-    loop_var: hostname
+- name: Checking if a Stack UUID is defined
+  ansible.builtin.assert:
+    that:
+      - stack_uuid is defined
+    fail_msg: Please define a Heat stack UUID to help distinguish between hosts
 
-- name: Generating a list of OpenStack hosts
+- name: Populating StorPool storage nodes group
   ansible.builtin.add_host:
     name: "{{ hostname }}"
     groups:
-      - openstack_hosts
-  loop: "{{ (groups['os_dev_stack_controller'] + groups['os_dev_stack_block_compute']) | intersect(groups['os_dev_stack_' + stack_uuid]) }}"
+      - storpool_server
+      - storpool_mgmt
+      - storpool_iscsi
+  loop: "{{ (groups['os_dev_stack_storage'] | intersect(groups['os_dev_stack_' + stack_uuid]) }}"
   loop_control:
     loop_var: hostname
 
@@ -24,9 +23,33 @@
       - galera_all
       - rabbitmq_all
       - memcached_all
-      - glance_all
-      - placement_all
-      - cinder_all
+      - glance_api
+      - placement_api
+      - nova_api_os_compute
+      - nova_api_metadata
+      - nova_conductor
+      - nova_scheduler
+      - nova_console
+      - neutron_server
+      - neutron_dhcp_agent
+      - neutron_metadata_agent
+      - neutron_linuxbridge_agent
+      - cinder_api
+      - cinder_scheduler
+      - cinder_volume
   loop: "{{ groups['os_dev_stack_controller'] | intersect(groups['os_dev_stack_' + stack_uuid]) }}"
   loop_control:
     loop_var: hostname
+
+- name: Putting the OpenStack block compute nodes in the respective groups
+  ansible.builtin.add_host:
+    name: "{{ hostname }}"
+    groups:
+      - nova_compute
+      - neutron_linuxbridge_agent
+      - storpool_block
+  loop: "{{ groups['os_dev_stack_block_compute'] | intersect(groups['os_dev_stack_' + stack_uuid]) }}"
+  loop_control:
+    loop_var: hostname
+  when:
+    - "'os_dev_stack_block_compute' in groups"

@@ -1,0 +1,9 @@
+- name: Filling skeleton inventory
+  hosts: localhost
+  tasks:
+    - import_tasks: tasks/generate_storpool_configuration.yml
+
+- name: Install Nova compute agents
+  import_playbook: install-nova.yml
+  vars:
+    nova_hosts: "nova_compute:!nova_conductor:!nova_scheduler:!nova_api_os_compute:!nova_api_metadata:!nova_console"
