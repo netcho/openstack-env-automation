@@ -7,4 +7,4 @@
   delegate_to: localhost
   ansible.builtin.template:
     src: templates/storpool.conf.j2
-    dest: "{{ storpool_temp_configuration['path'] "
+    dest: "{{ storpool_temp_configuration['path'] }}"

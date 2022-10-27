@@ -1,0 +1,32 @@
+- name: Generating a list of StorPool hosts
+  ansible.builtin.add_host:
+    name: "{{ hostname }}"
+    groups:
+      - storpool
+  loop: "{{ (groups['os_dev_stack_storage'] + groups['os_dev_stack_block_compute']) | intersect(groups['os_dev_stack_' + stack_uuid]) }}"
+  loop_control:
+    loop_var: hostname
+
+- name: Generating a list of OpenStack hosts
+  ansible.builtin.add_host:
+    name: "{{ hostname }}"
+    groups:
+      - openstack_hosts
+  loop: "{{ (groups['os_dev_stack_controller'] + groups['os_dev_stack_block_compute']) | intersect(groups['os_dev_stack_' + stack_uuid]) }}"
+  loop_control:
+    loop_var: hostname
+
+- name: Putting the OpenStack controllers in the respective groups
+  ansible.builtin.add_host:
+    name: "{{ hostname }}"
+    groups:
+      - utility_all
+      - galera_all
+      - rabbitmq_all
+      - memcached_all
+      - glance_all
+      - placement_all
+      - cinder_all
+  loop: "{{ groups['os_dev_stack_controller'] | intersect(groups['os_dev_stack_' + stack_uuid]) }}"
+  loop_control:
+    loop_var: hostname
