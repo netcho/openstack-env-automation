@@ -6,3 +6,5 @@ fail_on_errors: yes
 keyed_groups:
   - key: openstack.metadata.os_dev_stack_uuid
     prefix: os_dev_stack
+  - key: openstack.metadata.os_dev_stack_role
+    prefix: os_dev_stack
