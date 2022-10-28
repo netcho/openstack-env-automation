@@ -3,6 +3,8 @@ private: yes
 legacy_groups: no
 expand_hostvars: yes
 fail_on_errors: yes
+compose:
+  ansible_user: openstack.metadata.ansible_user | default('root')
 keyed_groups:
   - key: openstack.metadata.os_dev_stack_uuid
     prefix: os_dev_stack
