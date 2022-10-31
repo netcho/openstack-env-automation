@@ -1,7 +1,7 @@
 - name: Filling skeleton inventory
   hosts: localhost
   tasks:
-    - import_tasks: tasks/generate_storpool_configuration.yml
+    - import_tasks: tasks/generate_dynamic_inventory.yml
 
 - name: Bootstrapping OpenStack hosts
   hosts: openstack_hosts
