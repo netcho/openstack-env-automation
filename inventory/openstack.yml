@@ -1,5 +1,4 @@
 plugin: openstack.cloud.openstack
-private: yes
 legacy_groups: no
 expand_hostvars: yes
 fail_on_errors: yes
