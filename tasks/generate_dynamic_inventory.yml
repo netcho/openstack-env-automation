@@ -11,7 +11,7 @@
       - storpool_server
       - storpool_mgmt
       - storpool_iscsi
-  loop: "{{ (groups['os_dev_stack_storage'] | intersect(groups['os_dev_stack_' + stack_uuid]) }}"
+  loop: "{{ groups['os_dev_stack_storage'] | intersect(groups['os_dev_stack_' + stack_uuid]) }}"
   loop_control:
     loop_var: hostname
 
