@@ -4,6 +4,10 @@
       - stack_uuid is defined
     fail_msg: Please define a Heat stack UUID to help distinguish between hosts
 
+- name: Converting Stack
+  ansible.builtin.set_fact:
+    stack_uuid_normalized: "{{ stack_uuid | replace('-', '_') }}"
+
 - name: Populating StorPool storage nodes group
   ansible.builtin.add_host:
     name: "{{ hostname }}"
@@ -11,7 +15,7 @@
       - storpool_server
       - storpool_mgmt
       - storpool_iscsi
-  loop: "{{ groups['os_dev_stack_storage'] | intersect(groups['os_dev_stack_' + stack_uuid]) }}"
+  loop: "{{ groups['os_dev_stack_storage'] | intersect(groups['os_dev_stack_' + stack_uuid_normalized]) }}"
   loop_control:
     loop_var: hostname
 
@@ -37,7 +41,7 @@
       - cinder_api
       - cinder_scheduler
       - cinder_volume
-  loop: "{{ groups['os_dev_stack_controller'] | intersect(groups['os_dev_stack_' + stack_uuid]) }}"
+  loop: "{{ groups['os_dev_stack_controller'] | intersect(groups['os_dev_stack_' + stack_uuid_normalized]) }}"
   loop_control:
     loop_var: hostname
 
@@ -48,7 +52,7 @@
       - nova_compute
       - neutron_linuxbridge_agent
       - storpool_block
-  loop: "{{ groups['os_dev_stack_block_compute'] | intersect(groups['os_dev_stack_' + stack_uuid]) }}"
+  loop: "{{ groups['os_dev_stack_block_compute'] | intersect(groups['os_dev_stack_' + stack_uuid_normalized]) }}"
   loop_control:
     loop_var: hostname
   when:
