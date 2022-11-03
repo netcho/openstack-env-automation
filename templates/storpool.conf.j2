@@ -16,5 +16,6 @@ SP_OURID={{ node_ip | split('.') | last }}
 {% if node.ansible_facts[interface].macaddress == () %}
 SP_IFACE1_CFG=1:{{ node.ansible_facts[interface].device }}:{{ node.ansible_facts[interface].device }}:0:{{ node.ansible_facts[interface].ipv4.address }}:b:x:v
 {% endif %}
+{% endif %}
 {% endfor %}
 {% endfor %}
