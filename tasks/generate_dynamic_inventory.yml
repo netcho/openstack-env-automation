@@ -27,6 +27,7 @@
       - galera_all
       - rabbitmq_all
       - memcached_all
+      - keystone_all
       - glance_api
       - placement_api
       - nova_api_os_compute
