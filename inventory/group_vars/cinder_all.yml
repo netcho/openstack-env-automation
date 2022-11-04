@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # If there are Swift hosts in the environment, then enable cinder backups to it
-cinder_service_backup_program_enabled: "{{ hostvars['localhost']['cinder_service_backup_program_enabled'] }}"
+cinder_service_backup_program_enabled: "{{ groups['swift_all'] is defined and groups['swift_all'] | length > 0 }}"
 
 # These are here rather than in cinder_all because
 # both the os_ceilometer and os_cinder roles require them
