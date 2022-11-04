@@ -39,7 +39,6 @@
       - neutron_dhcp_agent
       - neutron_metadata_agent
       - neutron_linuxbridge_agent
-      - cinder_all
       - cinder_api
       - cinder_scheduler
       - cinder_volume
