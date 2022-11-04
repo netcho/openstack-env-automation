@@ -94,19 +94,13 @@
 - name: Install cinder scheduler services
   import_playbook: install-cinder.yml
   vars:
-    cinder_hosts: "cinder_scheduler:!cinder_api"
+    cinder_hosts: "cinder_scheduler"
     cinder_serial: "{{ cinder_scheduler_serial | default(['1', '100%']) }}"
 
 - name: Install cinder volume services
   import_playbook: install-cinder.yml
   vars:
-    cinder_hosts: "cinder_volume:!cinder_scheduler:!cinder_api"
-    cinder_serial: "{{ cinder_backend_serial | default(['1', '100%']) }}"
-
-- name: Install cinder backup services
-  import_playbook: install-cinder.yml
-  vars:
-    cinder_hosts: "cinder_backup:!cinder_volume:!cinder_scheduler:!cinder_api"
+    cinder_hosts: "cinder_volume"
     cinder_serial: "{{ cinder_backend_serial | default(['1', '100%']) }}"
 
 - name: Install cinder API services
