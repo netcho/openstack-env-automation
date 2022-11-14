@@ -6,19 +6,19 @@
   roles:
     - storpool.bootstrap_node
     - storpool.install_sp_python
-    - install_storpool_components
-    - configure_networking
+    - storpool.install_storpool_components
+    - storpool.configure_networking
 
 - name: Configure StorPool disks
   hosts: storpool_server
   gather_facts: false
   roles:
-    - initialize_disks
+    - storpool.initialize_disks
 
 - name: Configure StorPool CGroups
   hosts: storpool
   gather_facts: false
   roles:
-    - configure_cgroups
-    - configure_services
+    - storpool.configure_cgroups
+    - storpool.configure_services
 
