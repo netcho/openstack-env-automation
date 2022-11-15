@@ -15,6 +15,7 @@ SP_OURID={{ node_ip | split('.') | last }}
 {% if 'ipv4' in node.ansible_facts[interface] %}
 {% if node.ansible_facts[interface].ipv4.address == node_ip %}
 SP_IFACE1_CFG=1:{{ node.ansible_facts[interface].device }}:{{ node.ansible_facts[interface].device }}:0:{{ node.ansible_facts[interface].ipv4.address }}:b:x:v
+{% endif %}
 {% elif 'macaddress' in node.ansible_facts[interface] and storpool_node_name in groups['storpool_iscsi'] %}
 SP_ISCSI_IFACE={{ node.ansible_facts[interface].device }}
 {% endif %}
