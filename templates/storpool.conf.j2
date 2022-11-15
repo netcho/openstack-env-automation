@@ -19,6 +19,5 @@ SP_IFACE1_CFG=1:{{ node.ansible_facts[interface].device }}:{{ node.ansible_facts
 {% elif 'macaddress' in node.ansible_facts[interface] and storpool_node_name in groups['storpool_iscsi'] %}
 SP_ISCSI_IFACE={{ node.ansible_facts[interface].device }}
 {% endif %}
-{% endif %}
 {% endfor %}
 {% endfor %}
