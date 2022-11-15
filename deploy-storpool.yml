@@ -14,7 +14,7 @@
     - storpool.install_sp_python
     - name: storpool.install_storpool_components
       vars:
-        sp_configuration_path: "{{ hostvars['localhost']['storpool_temp_configuration']['path'] }}"
+        sp_configuration_path: "{{ storpool_temp_configuration.path }}"
     - storpool.configure_networking
 
 - name: Configure StorPool disks
