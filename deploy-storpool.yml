@@ -1,3 +1,9 @@
+- name: Generating in-memory inventory
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - import_tasks: tasks/generate_dynamic_inventory.yml
+
 - name: Installing StorPool
   hosts: storpool
   gather_facts: yes
@@ -6,18 +12,20 @@
   roles:
     - storpool.bootstrap_node
     - storpool.install_sp_python
-    - storpool.install_storpool_components
+    - name: storpool.install_storpool_components
+      vars:
+        sp_configuration_path: "{{ hostvars['localhost']['storpool_temp_configuration']['path'] }}"
     - storpool.configure_networking
 
 - name: Configure StorPool disks
   hosts: storpool_server
-  gather_facts: false
+  gather_facts: no
   roles:
     - storpool.initialize_disks
 
 - name: Configure StorPool CGroups
   hosts: storpool
-  gather_facts: false
+  gather_facts: no
   roles:
     - storpool.configure_cgroups
     - storpool.configure_services

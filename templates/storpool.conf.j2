@@ -8,13 +8,15 @@ SP_AUTH_TOKEN={{ sp_auth_token }}
 
 {% for storpool_node_name in groups['storpool'] %}
 {% set node = hostvars[storpool_node_name] %}
-[{{ node.ansible_facts.hostname }}]
 {% set node_ip = (storpool_ip | ansible.utils.ipv4('address')) %}
+[{{ node.ansible_facts.hostname }}]
 SP_OURID={{ node_ip | split('.') | last }}
 {% for interface in node.ansible_interfaces %}
 {% if 'macaddress' in node.ansible_facts[interface] %}
-{% if node.ansible_facts[interface].macaddress == () %}
+{% if node.ansible_facts[interface].macaddress == node.openstack.addresses[sp_storage_network_name][0]['OS-EXT-IPS-MAC:mac_addr'] %}
 SP_IFACE1_CFG=1:{{ node.ansible_facts[interface].device }}:{{ node.ansible_facts[interface].device }}:0:{{ node.ansible_facts[interface].ipv4.address }}:b:x:v
+{% elif storpool_node_name in groups['storpool_iscsi'] and node.ansible_facts[interface]['ipv4'] is not defined %}
+SP_ISCSI_IFACE={{ node.ansible_facts[interface].device }}
 {% endif %}
 {% endif %}
 {% endfor %}

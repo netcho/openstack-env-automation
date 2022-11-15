@@ -98,6 +98,7 @@ all:
       vars:
         sp_new_cluster: True
         sp_reboot_after_install: True
+        sp_cg_conf_extra: system_limit=2G user_limit=1G
       children:
         storpool_server:
           hosts:
