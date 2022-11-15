@@ -1,6 +1,6 @@
 - name: Generating in-memory inventory
   hosts: localhost
-  gather_facts: no
+  gather_facts: yes
   tasks:
     - import_tasks: tasks/generate_dynamic_inventory.yml
 
