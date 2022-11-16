@@ -1,0 +1,149 @@
+---
+heat_template_version: 2021-04-16
+description: Deploys an OpenStack Development environment with StorPool
+parameters:
+  access_network:
+    type: string
+    label: Access Network
+    description: Name or UUID of a existing network to use for accessing the provisioned instances.
+    constraints:
+      - custom_constraint: neutron.network
+  storpool_image:
+    type: string
+    label: Storage Image
+    description: Name or UUID of existing image to provision the storage instance from.
+    constraints:
+      - custom_constraint: glance.image
+  openstack_image:
+    type: string
+    label: OpenStack Image
+    description: Name or UUID of existing image to provision the controller and compute instances from.
+    constraints:
+      - custom_constraint: glance.image
+resources:
+  storpool_data_disk:
+    type: OS::Cinder::Volume
+    properties:
+      name: storpool-data-disk
+      size: 400
+  storage_network:
+    type: OS::Neutron:Net
+    properties:
+      name: storage-backend-network
+      port_security_enabled: False
+  iscsi_network:
+    type: OS::Neutron::Net
+    properties:
+      name: iscsi-storage-network
+      port_security_enabled: False
+  storage_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: storage_network }
+      cidr: 192.168.100.0/24
+      allocation_pools:
+        - start: 192.168.100.1
+          end: 192.168.100.63
+      gateway_ip: ""
+      host_routes:
+        - destination: 192.168.101.0/24
+          nexthop: 192.168.100.254
+    depends_on: storage_network
+  iscsi_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: iscsi_network }
+      cidr: 192.168.101.0/24
+      allocation_pools:
+        - start: 192.168.100.1
+          end: 192.168.100.199
+      gateway_ip: ""
+      host_routes:
+        - destination: 192.168.100.0/24
+          nexthop: 192.168.101.254
+    depends_on: iscsi_network
+  router_storage_net_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: storage_network }
+      fixed_ips:
+        - ip_address: 192.168.100.254
+    depends_on: storage_network
+  router_iscsi_net_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: iscsi_network }
+      fixed_ips:
+        - ip_address: 192.168.101.254
+    depends_on: iscsi_network
+  storage_iscsi_net_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_resource: iscsi_network }
+      name: storage_node_iscsi
+    depends_on: iscsi_network
+  router:
+    type: OS::Neutron::Router
+    properties:
+      name: default-router
+  router_storage_net_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router: { get_resource: router }
+      port: { get_resource: router_storage_net_port }
+    depends_on: [ router, router_storage_net_port ]
+  router_iscsi_net_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router: { get_resource: router }
+      port: { get_resource: router_iscsi_net_port }
+    depends_on: [ router, router_iscsi_net_port ]
+  storage_instance:
+    type: OS::Nova::Server
+    properties:
+      flavor: m1.xlarge
+      name: storage-node
+      networks:
+        - network: { get_param: access_network }
+        - subnet: { get_resource: storage_network }
+        - subnet: { get_resource: iscsi_network }
+        - port: { get_resource: storage_iscsi_net_port }
+      block_device_mapping_v2:
+        - image: { get_param: storpool_image }
+          delete_on_termination: True
+        - volume: { get_resource: storpool_data_disk }
+          delete_on_termination: True
+      metadata:
+        os_dev_stack_uuid: { get_param: OS::stack_id }
+        os_dev_stack_role: storage
+    depends_on: [ storage_network, iscsi_network, storage_iscsi_net_port, storpool_data_disk ]
+  controller_instance:
+    type: OS::Nova::Server
+    properties:
+      flavor: m1.xlarge
+      name: controller
+      networks:
+        - network: { get_param: access_network }
+        - subnet: { get_resource: iscsi_network }
+      block_device_mapping_v2:
+        - image: { get_param: openstack_image }
+          delete_on_termination: True
+      metadata:
+        os_dev_stack_uuid: { get_param: OS::stack_id }
+        os_dev_stack_role: controller
+    depends_on: iscsi_network
+  block_compute_instance:
+    type: OS::Nova::Server
+    properties:
+      flavor: m1.large
+      name: block-compute
+      networks:
+        - network: { get_param: access_network }
+        - subnet: { get_resource: storage_network }
+      block_device_mapping_v2:
+        - image: { get_param: openstack_image }
+          delete_on_termination: True
+      metadata:
+        os_dev_stack_uuid: { get_param: OS::stack_id }
+        os_dev_stack_role: block_compute
+    depends_on: storage_network
