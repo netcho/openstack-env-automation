@@ -27,7 +27,7 @@ resources:
       name: storpool-data-disk
       size: 400
   storage_network:
-    type: OS::Neutron:Net
+    type: OS::Neutron::Net
     properties:
       name: storage-backend-network
       port_security_enabled: False
@@ -55,8 +55,8 @@ resources:
       network_id: { get_resource: iscsi_network }
       cidr: 192.168.101.0/24
       allocation_pools:
-        - start: 192.168.100.1
-          end: 192.168.100.199
+        - start: 192.168.101.1
+          end: 192.168.101.199
       gateway_ip: ""
       host_routes:
         - destination: 192.168.100.0/24
@@ -105,18 +105,22 @@ resources:
       name: storage-node
       networks:
         - network: { get_param: access_network }
-        - subnet: { get_resource: storage_network }
-        - subnet: { get_resource: iscsi_network }
+        - subnet: { get_resource: storage_subnet }
+        - subnet: { get_resource: iscsi_subnet }
         - port: { get_resource: storage_iscsi_net_port }
       block_device_mapping_v2:
         - image: { get_param: storpool_image }
+          volume_size: 80
           delete_on_termination: True
-        - volume: { get_resource: storpool_data_disk }
+        - volume_id: { get_resource: storpool_data_disk }
+          boot_index: -1
           delete_on_termination: True
+      user_data_format: RAW
+      user_data: { get_file: cloud-init.yaml }
       metadata:
         os_dev_stack_uuid: { get_param: OS::stack_id }
         os_dev_stack_role: storage
-    depends_on: [ storage_network, iscsi_network, storage_iscsi_net_port, storpool_data_disk ]
+    depends_on: [ storage_subnet, iscsi_subnet, storage_iscsi_net_port, storpool_data_disk ]
   controller_instance:
     type: OS::Nova::Server
     properties:
@@ -124,14 +128,17 @@ resources:
       name: controller
       networks:
         - network: { get_param: access_network }
-        - subnet: { get_resource: iscsi_network }
+        - subnet: { get_resource: iscsi_subnet }
       block_device_mapping_v2:
         - image: { get_param: openstack_image }
+          volume_size: 80
           delete_on_termination: True
+      user_data_format: RAW
+      user_data: { get_file: cloud-init.yaml }
       metadata:
         os_dev_stack_uuid: { get_param: OS::stack_id }
         os_dev_stack_role: controller
-    depends_on: iscsi_network
+    depends_on: iscsi_subnet
   block_compute_instance:
     type: OS::Nova::Server
     properties:
@@ -139,11 +146,14 @@ resources:
       name: block-compute
       networks:
         - network: { get_param: access_network }
-        - subnet: { get_resource: storage_network }
+        - subnet: { get_resource: storage_subnet }
       block_device_mapping_v2:
         - image: { get_param: openstack_image }
+          volume_size: 80
           delete_on_termination: True
+      user_data_format: RAW
+      user_data: { get_file: cloud-init.yaml }
       metadata:
         os_dev_stack_uuid: { get_param: OS::stack_id }
         os_dev_stack_role: block_compute
-    depends_on: storage_network
+    depends_on: storage_subnet
