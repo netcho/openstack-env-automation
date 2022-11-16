@@ -80,6 +80,7 @@ resources:
     type: OS::Neutron::Port
     properties:
       network: { get_resource: iscsi_network }
+      no_fixed_ips: True
       name: storage_node_iscsi
     depends_on: iscsi_network
   router:
