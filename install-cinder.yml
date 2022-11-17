@@ -40,6 +40,17 @@
     - "defaults/{{ install_method }}_install.yml"
   tags:
     - cinder
+  pre_tasks:
+    - import_tasks: tasks/generate_storpool_configuration.yml
+      when:
+        - cinder_hosts == "cinder_volume"
+    - name: Copying /etc/storpool.conf
+      become: yes
+      ansible.builtin.copy:
+        src: "{{ storpool_temp_configuration.path }}"
+        dest: /etc/storpool.conf
+      when:
+        - cinder_hosts == "cinder_volume"
   roles:
     - role: "os_cinder"
       become: yes
