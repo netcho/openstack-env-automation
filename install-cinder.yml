@@ -14,7 +14,7 @@
 # limitations under the License.
 
 - name: Gather cinder facts
-  hosts: "{{ cinder_hosts }}"
+  hosts: "{{ cinder_hosts }},storpool"
   gather_facts: false
   tags:
     - always

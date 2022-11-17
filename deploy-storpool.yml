@@ -4,6 +4,15 @@
   tasks:
     - import_tasks: tasks/generate_dynamic_inventory.yml
 
+- name: Gathering cinder_volume facts
+  hosts: cinder_volume
+  gather_facts: no
+  tasks:
+    - ansible.builtin.setup:
+        gather_subset:
+          - "!all"
+          - min
+
 - name: Installing StorPool
   hosts: storpool
   gather_facts: yes
