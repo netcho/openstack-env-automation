@@ -1,6 +1,6 @@
 SP_CLUSTER_NAME={{ sp_cluster_name }}
 SP_CLUSTER_ID={{ sp_cluster_id }}
-SP_EXPECTED_NODES=1
+SP_EXPECTED_NODES={{ groups['storpool_server'] | length }}
 
 SP_RAUTH_TOKEN={{ sp_rauth_token }}
 
@@ -28,6 +28,9 @@ SP_API_IFACE={{ node.ansible_facts[interface].device }}
 SP_ISCSI_IFACE={{ node.ansible_facts[interface].device }}
 {% endif %}
 {% endfor %}
+{% if storpool_node_name not in groups['storpool_server'] %}
+SP_NODE_NON_VOTING=1
+{% endif %}
 {% endfor %}
 
 {% for controller_node_name in groups['cinder_volume'] %}
