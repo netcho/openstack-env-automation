@@ -93,6 +93,12 @@ all:
                 cinder_user_pip_packages:
                   - storpool
                   - storpool.spopenstack
+                cinder_backends:
+                  storpool_virtual:
+                    volume_backend_name: storpool_virtual
+                    volume_driver: cinder.volume.drivers.storpool.StorPoolDriver
+                    iscsi_portal_group: pg
+                    iscsi_cinder_volume: True
     storpool:
       hosts:
       vars:
