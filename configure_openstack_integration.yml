@@ -4,6 +4,15 @@
   tasks:
     - import_tasks: tasks/generate_dynamic_inventory.yml
 
+- name: Gathering facts for all hosts in the stack
+  hosts: "os_dev_stack_{{ stack_uuid_normalized }}"
+  gather_facts: no
+  tasks:
+    - setup:
+        gather_subset:
+          - "!all"
+          - min
+
 - name: Generating storpool.conf on controller hosts
   hosts: cinder_volume,glance_api
   tasks:
