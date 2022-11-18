@@ -5,7 +5,7 @@
     - import_tasks: tasks/generate_dynamic_inventory.yml
 
 - name: Gathering facts for all hosts in the stack
-  hosts: "os_dev_stack_{{ stack_uuid_normalized }}"
+  hosts: "os_dev_stack_{{ hostvars['localhost']['stack_uuid_normalized'] }}"
   gather_facts: no
   tasks:
     - setup:
