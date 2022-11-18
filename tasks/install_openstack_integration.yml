@@ -1,0 +1,25 @@
+- name: Checking out StorPool OpenStack integration
+  ansible.builtin.git:
+    repo: https://github.com/storpool/storpool-openstack-integration.git
+    dest: "{{ ansible_user_dir }}/storpool-openstack-integration"
+
+- name: Configuring required users and groups
+  become: yes
+  ansible.builtin.command:
+    cmd: >-
+      {{ ansible_user_dir }}/storpool-openstack-integration groups
+      {% if inventory_hostname in groups['cinder_volume']
+      cinder
+      {% endif %}
+      {% if inventory_hostname in groups['glance_api']
+      glance
+      {% endif %}
+      {% if inventory_hostname in groups['nova_compute']
+      nova
+      {% endif %}
+
+- name: Restarting OpenStack services
+  become: yes
+  ansible.builtin.systemd:
+    name: "{{ if inventory_hostname in groups['nova_compute'] ['nova-compute'] else ['cinder-volume', 'glance-api'] }}"
+    state: restarted

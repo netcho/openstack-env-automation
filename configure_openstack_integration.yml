@@ -1,0 +1,15 @@
+- name: Generating in-memory inventory
+  hosts: localhost
+  gather_facts: yes
+  tasks:
+    - import_tasks: tasks/generate_dynamic_inventory.yml
+
+- name: Generating storpool.conf on controller hosts
+  hosts: cinder_volume,glance_api
+  tasks:
+    - import_tasks: tasks/generate_storpool_configuration.yml
+
+- name: Configuring OpenStack integration
+  hosts: cinder_volume,glance_api,storpool_block
+  tasks:
+    - import_tasks: tasks/install_openstack_integration.yml
