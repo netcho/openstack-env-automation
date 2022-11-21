@@ -18,6 +18,11 @@
   hosts: cinder_volume,glance_api
   tasks:
     - import_tasks: tasks/generate_storpool_configuration.yml
+    - name: Copying storpool.conf to OpenStack controllers
+      become: yes
+      ansible.builtin.copy:
+        src: "{{ storpool_temp_configuration['path'] }}"
+        dest: /etc/storpool.conf
 
 - name: Configuring OpenStack integration
   hosts: cinder_volume,glance_api,storpool_block
