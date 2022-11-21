@@ -99,13 +99,53 @@ resources:
       router: { get_resource: router }
       port: { get_resource: router_iscsi_net_port }
     depends_on: [ router, router_iscsi_net_port ]
+  remote_access_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: os_dev_remote_access
+      rules:
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+  controller_services_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: os_dev_controller
+      rules:
+        - direction: ingress
+          protocol: tcp
+          port_range_min: 5000
+          port_range_max: 9696
+  storage_access_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: access_network }
+      security_groups:
+        - default
+        - { get_resource: remote_access_security_group }
+  controller_access_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: access_network }
+      security_groups:
+        - default
+        - { get_resource: remote_access_security_group }
+        - { get_resource: controller_services_security_group }
+  block_compute_access_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: access_network }
+      security_groups:
+        - default
+        - { get_resource: remote_access_security_group }
   storage_instance:
     type: OS::Nova::Server
     properties:
       flavor: m1.xlarge
       name: storage-node
       networks:
-        - network: { get_param: access_network }
+        - port: { get_resource: storage_access_port }
         - subnet: { get_resource: storage_subnet }
         - subnet: { get_resource: iscsi_subnet }
         - port: { get_resource: storage_iscsi_net_port }
@@ -121,14 +161,14 @@ resources:
       metadata:
         os_dev_stack_uuid: { get_param: OS::stack_id }
         os_dev_stack_role: storage
-    depends_on: [ storage_subnet, iscsi_subnet, storage_iscsi_net_port, storpool_data_disk ]
+    depends_on: [ storage_subnet, iscsi_subnet, storage_iscsi_net_port, storage_access_port, storpool_data_disk ]
   controller_instance:
     type: OS::Nova::Server
     properties:
       flavor: m1.xlarge
       name: controller
       networks:
-        - network: { get_param: access_network }
+        - port: { get_resource: controller_access_port }
         - subnet: { get_resource: iscsi_subnet }
       block_device_mapping_v2:
         - image: { get_param: openstack_image }
@@ -139,14 +179,14 @@ resources:
       metadata:
         os_dev_stack_uuid: { get_param: OS::stack_id }
         os_dev_stack_role: controller
-    depends_on: iscsi_subnet
+    depends_on: [ iscsi_subnet, controller_access_port ]
   block_compute_instance:
     type: OS::Nova::Server
     properties:
       flavor: m1.large
       name: block-compute
       networks:
-        - network: { get_param: access_network }
+        - port: { get_resource: block_compute_access_port }
         - subnet: { get_resource: storage_subnet }
       block_device_mapping_v2:
         - image: { get_param: openstack_image }
@@ -156,5 +196,5 @@ resources:
       user_data: { get_file: cloud-init.yaml }
       metadata:
         os_dev_stack_uuid: { get_param: OS::stack_id }
-        os_dev_stack_role: block_compute
+        os_dev_stack_role: [ block_compute, block_compute_access_port ]
     depends_on: storage_subnet
