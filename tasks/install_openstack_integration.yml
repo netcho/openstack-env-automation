@@ -8,13 +8,13 @@
   ansible.builtin.command:
     cmd: >-
       {{ ansible_user_dir }}/storpool-openstack-integration groups
-      {% if inventory_hostname in groups['cinder_volume']
+      {% if inventory_hostname in groups['cinder_volume'] %}
       cinder
       {% endif %}
-      {% if inventory_hostname in groups['glance_api']
+      {% if inventory_hostname in groups['glance_api'] %}
       glance
       {% endif %}
-      {% if inventory_hostname in groups['nova_compute']
+      {% if inventory_hostname in groups['nova_compute'] %}
       nova
       {% endif %}
 
