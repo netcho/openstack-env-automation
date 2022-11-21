@@ -6,6 +6,7 @@
 - name: Configuring required users and groups
   become: yes
   ansible.builtin.command:
+    chdir: "{{ ansible_user_dir }}/storpool-openstack-integration"
     cmd: >-
       {{ ansible_user_dir }}/storpool-openstack-integration/sp-openstack groups
       {% if inventory_hostname in groups['cinder_volume'] %}
