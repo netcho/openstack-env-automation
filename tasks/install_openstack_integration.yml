@@ -7,7 +7,7 @@
   become: yes
   ansible.builtin.command:
     cmd: >-
-      {{ ansible_user_dir }}/storpool-openstack-integration groups
+      {{ ansible_user_dir }}/storpool-openstack-integration/sp-openstack groups
       {% if inventory_hostname in groups['cinder_volume'] %}
       cinder
       {% endif %}
