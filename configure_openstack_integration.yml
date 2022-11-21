@@ -12,6 +12,7 @@
         gather_subset:
           - "!all"
           - min
+          - network
 
 - name: Generating storpool.conf on controller hosts
   hosts: cinder_volume,glance_api
