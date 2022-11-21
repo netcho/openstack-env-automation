@@ -30,7 +30,9 @@
   hosts: storpool_server
   gather_facts: no
   roles:
-    - storpool.initialize_disks
+    - name: storpool.initialize_disks
+      vars:
+        sp_diskid_offset: "{{ 23 if ( openstack.addresses[sp_storage_network_name][0]['addr'] | split('.') | last | int ) > 40 else 0 }}"
 
 - name: Configure StorPool CGroups
   hosts: storpool
