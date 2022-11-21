@@ -22,5 +22,6 @@
 - name: Restarting OpenStack services
   become: yes
   ansible.builtin.systemd:
-    name: "{{ if inventory_hostname in groups['nova_compute'] ['nova-compute'] else ['cinder-volume', 'glance-api'] }}"
+    name: "{{ item }}"
     state: restarted
+  loop: "{{ ['nova-compute'] if inventory_hostname in groups['nova_compute'] else ['cinder-volume', 'glance-api'] }}"
