@@ -20,7 +20,54 @@ parameters:
     description: Name or UUID of existing image to provision the controller and compute instances from.
     constraints:
       - custom_constraint: glance.image
+  awx_webhook_url:
+    type: string
+    label: AWX Webhook URL
+    description: URL of Webhook of AWX to call
+  awx_webhook_secret:
+    type: string
+    label: AWX Webhook Secret
+    description: Secret to verify the caller of the Webhook
 resources:
+  storpool_cloud_config:
+    type: OS::Heat::CloudConfig
+    properties:
+      cloud_config:
+        users:
+          - default
+          - name: awx
+            sudo: ALL=(ALL) NOPASSWD:ALL
+            shell: /bin/bash
+            ssh_authorized_keys:
+              - { get_file: https://vault.storpool.com/support-key.pub }
+              - { get_file: https://vault.storpool.com/awx-key.pub }
+        write_files:
+          - path: /run/awx_payload.json
+            content:
+              str_replace:
+                template: |
+                  {"stack_uuid": "stack_id", "storpool_network_name": "storage_network_name"}
+                params:
+                  stack_id: { get_param: OS::stack_id }
+                  storage_network_name: { get_attr: [storage_network, name] }
+        runcmd:
+          - str_replace:
+              template: "curl -H 'X-Gitlab-Token: gitlab_token' -H 'Content-Type: application/json' -d @/run/awx_payload.json -X POST gitlab_url"
+              params:
+                gitlab_url: { get_param: awx_webhook_url }
+                gitlab_token: { get_param: awx_webhook_secret }
+  openstack_cloud_config:
+    type: OS::Heat::CloudConfig
+    properties:
+      cloud_config:
+        users:
+          - default
+          - name: awx
+            sudo: ALL=(ALL) NOPASSWD:ALL
+            shell: /bin/bash
+            ssh_authorized_keys:
+              - { get_file: https://vault.storpool.com/support-key.pub }
+              - { get_file: https://vault.storpool.com/awx-key.pub }
   storpool_data_disk:
     type: OS::Cinder::Volume
     properties:
@@ -157,7 +204,7 @@ resources:
           boot_index: -1
           delete_on_termination: True
       user_data_format: RAW
-      user_data: { get_file: cloud-init.yaml }
+      user_data: { get_resource: storpool_cloud_config }
       metadata:
         os_dev_stack_uuid: { get_param: OS::stack_id }
         os_dev_stack_role: storage
@@ -175,7 +222,7 @@ resources:
           volume_size: 80
           delete_on_termination: True
       user_data_format: RAW
-      user_data: { get_file: cloud-init.yaml }
+      user_data: { get_resource: openstack_cloud_config }
       metadata:
         os_dev_stack_uuid: { get_param: OS::stack_id }
         os_dev_stack_role: controller
@@ -193,7 +240,7 @@ resources:
           volume_size: 80
           delete_on_termination: True
       user_data_format: RAW
-      user_data: { get_file: cloud-init.yaml }
+      user_data: { get_resource: openstack_cloud_config }
       metadata:
         os_dev_stack_uuid: { get_param: OS::stack_id }
         os_dev_stack_role: [ block_compute, block_compute_access_port ]

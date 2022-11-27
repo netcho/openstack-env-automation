@@ -1,7 +1,7 @@
-- name: Checking if StorPool and iSCSI network names are set
+- name: Checking if StorPool network name is set
   ansible.builtin.assert:
     that:
-      - sp_storage_network_name is defined
+      - tower_webhook_payload['storpool_network_name'] is defined
 
 - name: Creating a temporary file
   delegate_to: localhost

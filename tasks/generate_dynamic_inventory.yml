@@ -1,12 +1,12 @@
 - name: Checking if a Stack UUID is defined
   ansible.builtin.assert:
     that:
-      - stack_uuid is defined
+      - tower_webhook_payload['stack_uuid'] is defined
     fail_msg: Please define a Heat stack UUID to help distinguish between hosts
 
 - name: Converting Stack
   ansible.builtin.set_fact:
-    stack_uuid_normalized: "{{ stack_uuid | replace('-', '_') }}"
+    stack_uuid_normalized: "{{ tower_webhook_payload['stack_uuid'] | replace('-', '_') }}"
 
 - name: Populating StorPool storage nodes group
   ansible.builtin.add_host:
