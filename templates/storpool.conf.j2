@@ -6,8 +6,6 @@ SP_RAUTH_TOKEN={{ sp_rauth_token }}
 
 SP_AUTH_TOKEN={{ sp_auth_token }}
 
-{% set sp_storage_network_name = tower_webhook_payload['storpool_network_name'] %}
-
 {% set mgmt_service_first_hostname = (groups['storpool_mgmt'] | first) %}
 {% set mgmt_service_first_nic_mac = hostvars[mgmt_service_first_hostname].openstack.addresses[sp_storage_network_name][0]['OS-EXT-IPS-MAC:mac_addr'] %}
 {% set mgmt_service_first_nic = hostvars[mgmt_service_first_hostname] | dict2items | map(attribute='value') | select('mapping') | selectattr('macaddress', 'defined') | selectattr('macaddress', 'eq', mgmt_service_first_nic_mac) | first %}

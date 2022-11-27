@@ -3,6 +3,11 @@
     that:
       - tower_webhook_payload['storpool_network_name'] is defined
 
+- name: Setting storage network name
+  ansible.builtin.set_fact:
+    sp_storage_network_name: "{{ tower_webhook_payload['storpool_network_name'] }}"
+    cacheable: yes
+
 - name: Creating a temporary file
   delegate_to: localhost
   ansible.builtin.tempfile:
