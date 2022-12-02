@@ -77,6 +77,7 @@ all:
                 neutron_neutron_conf_overrides:
                   experimental:
                     linuxbridge: True
+                neutron_ovn_ssl: False
             cinder_all:
               hosts:
               children:
