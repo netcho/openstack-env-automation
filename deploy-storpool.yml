@@ -59,6 +59,19 @@
         api_url: "http://{{ api_host_result.stdout }}:81"
         api_token: "{{ api_token_result.stdout }}"
   tasks:
+    - name: "Waiting for cluster {{ cloudstack_cluster }} to become ready"
+      ansible.builtin.uri:
+        url: "{{ api_url }}/ctrl/1.0/ServersListBlocked"
+        headers:
+          Authorization: "Storpool v1:{{ api_token }}"
+        return_content: true
+        body_format: json
+      register: wait_for_cluster_request
+      until:
+        - wait_for_cluster_request.status == 200
+        - wait_for_cluster_request.json.data.clusterStatus == "running"
+      retries: 36
+      delay: 5
     - name: Retrieving initialized disks
       ansible.builtin.uri:
         url: "{{ api_url }}/ctrl/1.0/DisksList"
