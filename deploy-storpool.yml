@@ -75,7 +75,7 @@
         body_format: json
         body: >-
           {
-             "addDisks": [{{ ((disk_list_result | from_json)['data'] | dict2items | map(attribute='key')) | join(',') }}]
+             "addDisks": [{{ (disk_list_result.json.data | dict2items | map(attribute='key') | join(',') }}]
           }
     - name: Creating the virtual template
       ansible.builtin.uri:
