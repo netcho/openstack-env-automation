@@ -41,3 +41,82 @@
     - storpool.configure_cgroups
     - storpool.configure_services
 
+- name: Configuring StorPool resources
+  hosts: storpool_server
+  gather_facts: no
+  pre_tasks:
+    - name: Retrieving StorPool API address
+      ansible.builtin.command: "storpool_showconf -ne SP_API_HTTP_HOST"
+      register: api_host_result
+    - name: Retrieving StorPool API authentication token
+      ansible.builtin.command: "storpool_showconf -ne SP_AUTH_TOKEN"
+      register: api_token_result
+    - name: Retrieving StorPool Node ID
+      ansible.builtin.command: "storpool_showconf -ne SP_OURID"
+      register: node_id_result
+    - name: Setting API facts
+      ansible.builtin.set_fact:
+        api_url: "http://{{ api_host_result.stdout }}:81"
+        api_token: "{{ api_token_result.stdout }}"
+  tasks:
+    - name: Retrieving initialized disks
+      ansible.builtin.uri:
+        url: "{{ api_url }}/ctrl/1.0/DisksList"
+        headers:
+          Authorization: "Storpool v1:{{ api_token }}"
+        method: GET
+      register: disk_list_result
+    - name: Adding disks to the virtual placement group
+      ansible.builtin.uri:
+        url: "{{ api_url }}/ctrl/1.0/PlacementGroupUpdate/virtual"
+        headers:
+          Authorization: "Storpool v1:{{ api_token }}"
+        method: POST
+        body_format: json
+        body: >-
+          {
+             "addDisks": [{{ ((disk_list_result | from_json)['data'] | dict2items | map(attribute='key')) | join(',') }}]
+          }
+    - name: Creating the virtual template
+      ansible.builtin.uri:
+        url: "{{ api_url }}/ctrl/1.0/DisksList"
+        headers:
+          Authorization: "Storpool v1:{{ api_token }}"
+        method: POST
+        body_format: json
+        body: >-
+          {
+             "name": "virtual",
+             "replication": 1,
+             "placeAll": "virtual"
+          }
+    - name: Configuring iSCSI
+      ansible.builtin.uri:
+        url: "{{ api_url }}/ctrl/1.0/DisksList"
+        headers:
+          Authorization: "Storpool v1:{{ api_token }}"
+        method: POST
+        body_format: json
+        body: >-
+          {
+              "commands": [{
+                  "setBaseName": {
+                      "name": "iqn.2011-11.storpool.com:os-dev"
+                  }
+              },{
+                  "createPortalGroup": {
+                      "name": "pg"
+                  }
+              },{
+                  "portalGroupAddNetwork": {
+                      "portalGroup": "pg",
+                      "net": "192.168.101.200/24"
+                  }
+              },{
+                  "createPortal": {
+                      "portalGroup": "pg",
+                      "controller": "{{ node_id_result.stdout }}",
+                      "ip": "192.168.101.201"
+                  }
+              }]
+          }
