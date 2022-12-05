@@ -79,7 +79,7 @@
           }
     - name: Creating the virtual template
       ansible.builtin.uri:
-        url: "{{ api_url }}/ctrl/1.0/DisksList"
+        url: "{{ api_url }}/ctrl/1.0/VolumeTemplateCreate"
         headers:
           Authorization: "Storpool v1:{{ api_token }}"
         method: POST
@@ -92,7 +92,7 @@
           }
     - name: Configuring iSCSI
       ansible.builtin.uri:
-        url: "{{ api_url }}/ctrl/1.0/DisksList"
+        url: "{{ api_url }}/ctrl/1.0/iSCSIConfig"
         headers:
           Authorization: "Storpool v1:{{ api_token }}"
         method: POST
