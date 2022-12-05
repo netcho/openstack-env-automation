@@ -71,17 +71,29 @@ resources:
   storpool_data_disk:
     type: OS::Cinder::Volume
     properties:
-      name: storpool-data-disk
+      name:
+        str_replace:
+          template: stack-name-storpool-data-disk
+          params:
+            stack-name: { get_param: OS::stack_name }
       size: 400
   storage_network:
     type: OS::Neutron::Net
     properties:
-      name: storage-backend-network
+      name:
+        str_replace:
+          template: stack-name-storage-network
+          params:
+            stack-name: { get_param: OS::stack_name }
       port_security_enabled: False
   iscsi_network:
     type: OS::Neutron::Net
     properties:
-      name: iscsi-storage-network
+      name:
+        str_replace:
+          template: stack-name-iscsi-storage-network
+          params:
+            stack-name: { get_param: OS::stack_name }
       port_security_enabled: False
   storage_subnet:
     type: OS::Neutron::Subnet
@@ -128,12 +140,20 @@ resources:
     properties:
       network: { get_resource: iscsi_network }
       no_fixed_ips: True
-      name: storage_node_iscsi
+      name:
+        str_replace:
+          template: stack-name-storage-node-iscsi
+          params:
+            stack-name: { get_param: OS::stack_name }
     depends_on: iscsi_network
   router:
     type: OS::Neutron::Router
     properties:
-      name: default-router
+      name:
+        str_replace:
+          template: stack-name-default-router
+          params:
+            stack-name: { get_param: OS::stack_name }
   router_storage_net_interface:
     type: OS::Neutron::RouterInterface
     properties:
@@ -149,7 +169,11 @@ resources:
   remote_access_security_group:
     type: OS::Neutron::SecurityGroup
     properties:
-      name: os_dev_remote_access
+      name:
+        str_replace:
+          template: stack-name-remote-access
+          params:
+            stack-name: { get_param: OS::stack_name }
       rules:
         - direction: ingress
           protocol: tcp
@@ -158,7 +182,11 @@ resources:
   controller_services_security_group:
     type: OS::Neutron::SecurityGroup
     properties:
-      name: os_dev_controller
+      name:
+        str_replace:
+          template: stack-name-controller
+          params:
+            stack-name: { get_param: OS::stack_name }
       rules:
         - direction: ingress
           protocol: tcp
@@ -190,7 +218,11 @@ resources:
     type: OS::Nova::Server
     properties:
       flavor: m1.xlarge
-      name: storage-node
+      name:
+        str_replace:
+          template: stack-name-storage-node
+          params:
+            stack-name: { get_param: OS::stack_name }
       networks:
         - port: { get_resource: storage_access_port }
         - subnet: { get_resource: storage_subnet }
@@ -213,7 +245,11 @@ resources:
     type: OS::Nova::Server
     properties:
       flavor: m1.xlarge
-      name: controller
+      name:
+        str_replace:
+          template: stack-name-os-controller
+          params:
+            stack-name: { get_param: OS::stack_name }
       networks:
         - port: { get_resource: controller_access_port }
         - subnet: { get_resource: iscsi_subnet }
@@ -231,7 +267,11 @@ resources:
     type: OS::Nova::Server
     properties:
       flavor: m1.large
-      name: block-compute
+      name:
+        str_replace:
+          template: stack-name-block-compute
+          params:
+            stack-name: { get_param: OS::stack_name }
       networks:
         - port: { get_resource: block_compute_access_port }
         - subnet: { get_resource: storage_subnet }
