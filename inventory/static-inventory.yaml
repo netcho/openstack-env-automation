@@ -17,6 +17,8 @@ all:
               hosts:
             utility_all:
               hosts:
+            zookeeper_all:
+              hosts:
             keystone_all:
               hosts:
               vars:
