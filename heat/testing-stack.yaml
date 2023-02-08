@@ -86,12 +86,21 @@ resources:
           params:
             stack-name: { get_param: OS::stack_name }
       port_security_enabled: False
-  iscsi_network:
+  iscsi_path1_network:
     type: OS::Neutron::Net
     properties:
       name:
         str_replace:
-          template: stack-name-iscsi-storage-network
+          template: stack-name-iscsi-path1-network
+          params:
+            stack-name: { get_param: OS::stack_name }
+      port_security_enabled: False
+  iscsi_path2_network:
+    type: OS::Neutron::Net
+    properties:
+      name:
+        str_replace:
+          template: stack-name-iscsi-path2-network
           params:
             stack-name: { get_param: OS::stack_name }
       port_security_enabled: False
@@ -108,64 +117,48 @@ resources:
         - destination: 192.168.101.0/24
           nexthop: 192.168.100.254
     depends_on: storage_network
-  iscsi_subnet:
+  iscsi_path1_subnet:
     type: OS::Neutron::Subnet
     properties:
-      network_id: { get_resource: iscsi_network }
+      network_id: { get_resource: iscsi_path1_network }
       cidr: 192.168.101.0/24
       allocation_pools:
         - start: 192.168.101.1
           end: 192.168.101.199
       gateway_ip: ""
-      host_routes:
-        - destination: 192.168.100.0/24
-          nexthop: 192.168.101.254
-    depends_on: iscsi_network
-  router_storage_net_port:
+    depends_on: iscsi_path1_network
+  iscsi_path2_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: iscsi_path2_network }
+      cidr: 192.168.102.0/24
+      allocation_pools:
+        - start: 192.168.102.1
+          end: 192.168.102.199
+      gateway_ip: ""
+    depends_on: iscsi_path2_network
+  storage_iscsi_path1_port:
     type: OS::Neutron::Port
     properties:
-      network: { get_resource: storage_network }
-      fixed_ips:
-        - ip_address: 192.168.100.254
-    depends_on: storage_network
-  router_iscsi_net_port:
-    type: OS::Neutron::Port
-    properties:
-      network: { get_resource: iscsi_network }
-      fixed_ips:
-        - ip_address: 192.168.101.254
-    depends_on: iscsi_network
-  storage_iscsi_net_port:
-    type: OS::Neutron::Port
-    properties:
-      network: { get_resource: iscsi_network }
+      network: { get_resource: iscsi_path1_network }
       no_fixed_ips: True
       name:
         str_replace:
-          template: stack-name-storage-node-iscsi
+          template: stack-name-storage-node-iscsi-path1
           params:
             stack-name: { get_param: OS::stack_name }
-    depends_on: iscsi_network
-  router:
-    type: OS::Neutron::Router
+    depends_on: iscsi_path1_network
+  storage_iscsi_path2_port:
+    type: OS::Neutron::Port
     properties:
+      network: { get_resource: iscsi_path2_network }
+      no_fixed_ips: True
       name:
         str_replace:
-          template: stack-name-default-router
+          template: stack-name-storage-node-iscsi-path1
           params:
             stack-name: { get_param: OS::stack_name }
-  router_storage_net_interface:
-    type: OS::Neutron::RouterInterface
-    properties:
-      router: { get_resource: router }
-      port: { get_resource: router_storage_net_port }
-    depends_on: [ router, router_storage_net_port ]
-  router_iscsi_net_interface:
-    type: OS::Neutron::RouterInterface
-    properties:
-      router: { get_resource: router }
-      port: { get_resource: router_iscsi_net_port }
-    depends_on: [ router, router_iscsi_net_port ]
+    depends_on: iscsi_path2_network
   remote_access_security_group:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -226,8 +219,10 @@ resources:
       networks:
         - port: { get_resource: storage_access_port }
         - subnet: { get_resource: storage_subnet }
-        - subnet: { get_resource: iscsi_subnet }
-        - port: { get_resource: storage_iscsi_net_port }
+        - subnet: { get_resource: iscsi_path1_subnet }
+        - subnet: { get_resource: iscsi_path2_subnet }
+        - port: { get_resource: storage_iscsi_path1_port }
+        - port: { get_resource: storage_iscsi_path2_port }
       block_device_mapping_v2:
         - image: { get_param: storpool_image }
           volume_size: 80
@@ -240,11 +235,11 @@ resources:
       metadata:
         os_dev_stack_uuid: { get_param: OS::stack_id }
         os_dev_stack_role: storage
-    depends_on: [ storage_subnet, iscsi_subnet, storage_iscsi_net_port, storage_access_port, storpool_data_disk ]
+    depends_on: [ storage_subnet, iscsi_path1_subnet, iscsi_path2_subnet, storage_iscsi_path1_port, storage_iscsi_path2_port, storage_access_port, storpool_data_disk ]
   controller_instance:
     type: OS::Nova::Server
     properties:
-      flavor: m1.xlarge
+      flavor: m1.2xlarge
       name:
         str_replace:
           template: stack-name-os-controller
@@ -252,7 +247,9 @@ resources:
             stack-name: { get_param: OS::stack_name }
       networks:
         - port: { get_resource: controller_access_port }
-        - subnet: { get_resource: iscsi_subnet }
+        - subnet: { get_resource: storage_subnet }
+        - subnet: { get_resource: iscsi_path1_subnet }
+        - subnet: { get_resource: iscsi_path2_subnet }
       block_device_mapping_v2:
         - image: { get_param: openstack_image }
           volume_size: 80
@@ -262,7 +259,7 @@ resources:
       metadata:
         os_dev_stack_uuid: { get_param: OS::stack_id }
         os_dev_stack_role: controller
-    depends_on: [ iscsi_subnet, controller_access_port ]
+    depends_on: [ iscsi_path1_subnet, iscsi_path2_subnet, storage_subnet, controller_access_port ]
   block_compute_instance:
     type: OS::Nova::Server
     properties:
