@@ -13,3 +13,4 @@
         openstack_host_manage_deploy_hosts_file: no
         openstack_host_extra_distro_packages:
           - acl
+          - python3-cryptography
