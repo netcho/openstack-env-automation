@@ -19,6 +19,11 @@
   tags:
     - always
     - sshd-ca
+  pre_tasks:
+    - name: "Updating python3-cryptography package"
+      package:
+        name: python3-cryptography
+        state: latest
   tasks:
     - name: "Create SSHD certificate authority"
       include_role:
