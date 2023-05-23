@@ -18,14 +18,13 @@ SP_API_HTTP_HOST={{ (mgmt_service_first_nic.ipv4.network + '/' + mgmt_service_fi
 [{{ node.ansible_facts.nodename }}]
 SP_OURID={{ sp_node_ip | split('.') | last }}
 {% for interface in ( node.ansible_interfaces | reject("eq", "lo") ) %}
-{% if 'ipv4' in node.ansible_facts[interface] %}
 {% if node.ansible_facts[interface].macaddress == sp_node_mac %}
 SP_IFACE1_CFG=1:{{ node.ansible_facts[interface].device }}:{{ node.ansible_facts[interface].device }}:0:{{ sp_node_ip }}:b:x:v
 {% if storpool_node_name in groups['storpool_mgmt'] %}
 SP_API_IFACE={{ node.ansible_facts[interface].device }}
 {% endif %}
 {% endif %}
-{% elif 'macaddress' in node.ansible_facts[interface] and storpool_node_name in groups['storpool_iscsi'] %}
+{% if 'ipv4' not in node.ansible_facts[interface] and storpool_node_name in groups['storpool_iscsi'] %}
 SP_ISCSI_IFACE={{ node.ansible_facts[interface].device }}
 {% endif %}
 {% endfor %}
