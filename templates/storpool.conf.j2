@@ -17,7 +17,7 @@ SP_API_HTTP_HOST={{ (mgmt_service_first_nic.ipv4.network + '/' + mgmt_service_fi
 {% set sp_node_mac =  node.openstack.addresses[sp_storage_network_name][0]['OS-EXT-IPS-MAC:mac_addr'] %}
 [{{ node.ansible_facts.nodename }}]
 SP_OURID={{ sp_node_ip | split('.') | last }}
-{% for interface in node.ansible_interfaces %}
+{% for interface in ( node.ansible_interfaces | reject("eq", "lo") ) %}
 {% if 'ipv4' in node.ansible_facts[interface] %}
 {% if node.ansible_facts[interface].macaddress == sp_node_mac %}
 SP_IFACE1_CFG=1:{{ node.ansible_facts[interface].device }}:{{ node.ansible_facts[interface].device }}:0:{{ sp_node_ip }}:b:x:v
