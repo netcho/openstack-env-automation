@@ -31,6 +31,7 @@ SP_ISCSI_IFACE={{ node.ansible_facts[interface].device }}
 {% if storpool_node_name not in groups['storpool_server'] %}
 SP_NODE_NON_VOTING=1
 {% endif %}
+
 {% endfor %}
 
 {% for controller_node_name in groups['cinder_volume'] %}
