@@ -72,7 +72,7 @@
   import_playbook: install-nova.yml
   vars:
     nova_hosts: "nova_conductor:nova_scheduler:nova_api_os_compute:nova_api_metadata:nova_console"
-    openstack_pki_setup_host: "{{ groups['nova_api_os_compute'][0] }}"
+    nova_pki_setup_host: "{{ groups['nova_api_os_compute'][0] }}"
 
 - name: Install Neutron API server
   import_playbook: install-neutron.yml
