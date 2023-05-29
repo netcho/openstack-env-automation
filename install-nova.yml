@@ -40,6 +40,21 @@
     - "defaults/{{ install_method }}_install.yml"
   tags:
     - nova
+  pre_tasks:
+    # Enable execution of ceph_client on the nova compute hosts if cinder RBD
+    # backends are used. This is necessary to ensure that volume-backed Nova
+    # instances can function when RBD is the volume backend.
+    - name: Set cinder RBD inuse fact
+      set_fact:
+        nova_cinder_rbd_inuse: "{{ True in groups['cinder_volume'] | map('extract', hostvars, 'cinder_backend_rbd_inuse') }}"
+      delegate_to: localhost
+      delegate_facts: True
+      when:
+        - "'nova_compute' in group_names"
+        - "inventory_hostname == ((groups['nova_compute'] | intersect(ansible_play_hosts)) | list)[0]"
+        - "hostvars['localhost']['nova_cinder_rbd_inuse'] is not defined"
+      tags:
+        - always
   roles:
     - role: "os_nova"
       become: yes
